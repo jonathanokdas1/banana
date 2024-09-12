@@ -1,0 +1,46 @@
+import Link from "next/link";
+import { usePathname, useParams } from "next/navigation"; // Importa usePathname e useParams
+
+export const Sidebar = ({ tipoProduto }) => {
+  const pathname = usePathname(); // Obter o caminho atual
+  const { id } = useParams(); // Captura o ID da URL dinâmica
+
+  return (
+    <nav className="grid gap-4 text-sm text-muted-foreground">
+      <Link href={`/produtos/editar/${id}`} className={`font-semibold ${pathname === `/produtos/editar/${id}` ? "text-primary" : ""}`}>
+        Geral
+      </Link>
+      <Link href={`/produtos/editar/${id}/configuracoes`} className={`${pathname === `/produtos/editar/${id}/configuracoes` ? "text-primary font-semibold" : ""}`}>
+        Configurações
+      </Link>
+
+      {/* Área de Membros: disponível apenas para Cursos */}
+      {tipoProduto === "curso" && (
+        <Link href={`/produtos/editar/${id}/area-de-membros`} className={`${pathname === `/produtos/editar/${id}/area-de-membros` ? "text-primary font-semibold" : ""}`}>
+          Área de Membros
+        </Link>
+      )}
+
+      {/* Configuração do E-book: disponível apenas para E-books */}
+      {tipoProduto === "ebook" && (
+        <Link href={`/produtos/editar/${id}/ebook-config`} className={`${pathname === `/produtos/editar/${id}/ebook-config` ? "text-primary font-semibold" : ""}`}>
+          E-book e arquivos
+        </Link>
+      )}
+
+      {/* Configuração do Serviço: disponível apenas para Serviços */}
+      {tipoProduto === "servico" && (
+        <Link href={`/produtos/editar/${id}/servico-config`} className={`${pathname === `/produtos/editar/${id}/servico-config` ? "text-primary font-semibold" : ""}`}>
+          Configuração do Serviço
+        </Link>
+      )}
+
+      <Link href={`/produtos/editar/${id}/checkout`} className={`${pathname === `/produtos/editar/${id}/checkout` ? "text-primary font-semibold" : ""}`}>
+        Checkout
+      </Link>
+      <Link href={`/produtos/editar/${id}/links`} className={`${pathname === `/produtos/editar/${id}/links` ? "text-primary font-semibold" : ""}`}>
+        Links
+      </Link>
+    </nav>
+  );
+};

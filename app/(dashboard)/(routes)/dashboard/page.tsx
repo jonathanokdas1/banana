@@ -1,46 +1,49 @@
-"use client"; // Isso deve ser a primeira linha do arquivo
+"use client";
 
-import React, { useState } from "react";
-import { MyChart } from "@/components/dashboard/MyChart";
-import { DatePickerWithRange } from "@/components/dashboard/DatePickerWithRange";
+import React from 'react';
+import SaldoDisponivel from '@/components/dashboard/SaldoDisponivel';
+import VendasHoje from '@/components/dashboard/VendasHoje';
+import VendasSemanais from '@/components/dashboard/VendasSemanais';
+import ConversaoPagamento from '@/components/dashboard/ConversaoPagamento';
+import IndicadoresCrescimento from '@/components/dashboard/IndicadoresCrescimento';
+import Recompensa from '@/components/dashboard/Recompensa'; 
+import ConquistasNFT from '@/components/dashboard/ConquistasNFT'; 
 
-const DashboardPage = () => {
-  const [liveVisitors, setLiveVisitors] = useState(0); // Comente que esse valor será atualizado via API
-  const withdrawAmount = 0.0; // Valor fixo ou atualizado via API
-
+const Dashboard: React.FC = () => {
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      {/* Seletor de data, visitantes ao vivo e saldo */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
-          {/* Seletor de data com contorno */}
-          <div className="border border-gray-300 rounded-md p-2 flex items-center">
-            <DatePickerWithRange />
-          </div>
-
-          {/* Visitantes ao vivo com contorno */}
-          <div className="border border-gray-300 rounded-md p-2 flex items-center">
-            <div className="animation-live"></div>
-            <p className="ml-2">
-              {liveVisitors} visitantes ao vivo
-            </p>
-          </div>
+    <div className="flex justify-center p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-12 lg:grid-cols-12 gap-6 w-full max-w-6xl">
+        {/* Topo */}
+        <div className="col-span-12 sm:col-span-6">
+          <SaldoDisponivel />
+        </div>
+        <div className="col-span-12 sm:col-span-6">
+          <VendasHoje />
         </div>
 
-        {/* Saldo disponível para saque alinhado à direita */}
-        <div className="flex items-center">
-          <div className="border border-gray-300 rounded-md p-2">
-            Disponível para saque: R$ {withdrawAmount.toFixed(2)}
-          </div>
+        {/* Abaixo do topo */}
+        <div className="col-span-12">
+          <VendasSemanais />
         </div>
-      </div>
 
-      {/* Gráfico */}
-      <div className="mt-4">
-        <MyChart />
+        {/* Componentes adicionais */}
+        <div className="col-span-12 sm:col-span-6">
+          <ConversaoPagamento />
+        </div>
+        <div className="col-span-12 sm:col-span-6">
+          <IndicadoresCrescimento />
+        </div>
+
+        {/* Espaço compartilhado entre Recompensa e ConquistasNFT */}
+        <div className="col-span-12 sm:col-span-6">
+          <Recompensa valorRestante={21872.74} meta="PLACA DE 100K" progresso={78.13} />
+        </div>
+        <div className="col-span-12 sm:col-span-6">
+          <ConquistasNFT />
+        </div>
       </div>
     </div>
   );
 };
 
-export default DashboardPage;
+export default Dashboard;

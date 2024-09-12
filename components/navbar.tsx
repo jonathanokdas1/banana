@@ -5,8 +5,10 @@ import { useState } from "react";
 import { Moon, Sun, Menu, Bell } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "./ui/button";
-import { UserButton } from "@clerk/nextjs";
 import MobileSidebar from "./mobile-sidebar";
+import { useSession } from "next-auth/react";
+import Link from "next/link"; // Adicione essa linha para corrigir o erro
+import Avatar from "./Avatar"; // Importe o componente Avatar
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,14 +19,12 @@ import {
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession(); // Agora funciona corretamente com SessionProvider
 
-  // Defina o nome do usuário aqui (você deve obtê-lo dinamicamente no contexto real)
-  const userName = "Jonathan"; // <-- Substitua esta variável pelo nome do usuário real
-  
-  // Obtenha a hora atual
+  const userName = session?.user?.name || "Visitante";
+
   const currentHour = new Date().getHours();
 
-  // Defina a mensagem com base no período do dia
   let greetingMessage;
   if (currentHour >= 5 && currentHour < 12) {
     greetingMessage = `Bom dia, ${userName}!`;
@@ -33,10 +33,9 @@ const Navbar = () => {
   } else if (currentHour >= 18 && currentHour < 22) {
     greetingMessage = `Boa noite, ${userName}!`;
   } else {
-    greetingMessage = `Boa noite, ${userName}!`; // Mensagem motivacional de madrugada
+    greetingMessage = `Boa noite, ${userName}!`;
   }
 
-  // Notificações de teste
   const initialNotifications = [
     { id: 1, message: "Nova atualização disponível", time: "Agora", read: false },
     { id: 2, message: "Servidor será reiniciado às 22:00", time: "1h atrás", read: false },
@@ -45,12 +44,10 @@ const Navbar = () => {
 
   const [notifications, setNotifications] = useState(initialNotifications);
 
-  // Alterna o tema entre claro e escuro
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
-  // Função para marcar uma notificação como lida
   const markAsRead = (id) => {
     setNotifications((prev) =>
       prev.map((notification) =>
@@ -59,7 +56,6 @@ const Navbar = () => {
     );
   };
 
-  // Função para marcar todas as notificações como lidas
   const markAllAsRead = () => {
     setNotifications((prev) =>
       prev.map((notification) => ({ ...notification, read: true }))
@@ -73,18 +69,16 @@ const Navbar = () => {
         <Menu />
       </Button>
       <div className="flex w-full justify-end items-center space-x-4">
-        {/* Botão para alternar entre os temas */}
         <Button
           variant="outline"
           size="icon"
-          onClick={toggleTheme} // Ao clicar, alterna o tema
+          onClick={toggleTheme}
         >
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Alternar tema</span>
         </Button>
 
-        {/* Ícone de notificações com dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
@@ -93,22 +87,17 @@ const Navbar = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-72">
-            {/* Notificações */}
             {notifications.map((notification) => (
               <DropdownMenuItem
                 key={notification.id}
-                className={cn(
-                  "flex justify-between items-center w-full",
-                  notification.read ? "opacity-50" : ""
-                )}
-                onClick={() => markAsRead(notification.id)} // Marcar como lida ao clicar
+                className={notification.read ? "opacity-50" : ""}
+                onClick={() => markAsRead(notification.id)}
               >
                 <span>{notification.message}</span>
                 <span className="text-xs text-muted-foreground">{notification.time}</span>
               </DropdownMenuItem>
             ))}
 
-            {/* Separador e botão de "Marcar todas como lidas" */}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={markAllAsRead}>
               Marcar todas como lidas
@@ -116,15 +105,19 @@ const Navbar = () => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <span>{greetingMessage}</span> {/* Mensagem de saudação baseada no horário */}
-        <UserButton afterSignOutUrl="/" />
+        <span>{greetingMessage}</span>
+
+        {/* Substituindo o botão de "Sair" pelo Avatar */}
+        {session ? (
+          <Avatar /> // Mostra o avatar quando o usuário está logado
+        ) : (
+          <Link href="/sign-in">
+            <Button>Entrar</Button>
+          </Link>
+        )}
       </div>
     </div>
   );
 };
 
 export default Navbar;
-
-function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
-}

@@ -1,17 +1,21 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server'; 
+import type { NextRequest } from 'next/server'; 
+import { auth } from '@/auth'; 
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/pedidos(.*)']);
+export default async function middleware(req: NextRequest) {
+  const session = await auth();
 
-export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) {
-    auth().protect();
+  // Se não estiver autenticado e tentando acessar uma rota que não seja de login
+  if (!session?.user && !req.nextUrl.pathname.startsWith("/sign-in")) {
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
-}, { debug: true });
 
+  return NextResponse.next();
+}
+
+// Protege todas as rotas, exceto _next (arquivos estáticos), API, e rotas como /sign-in
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-    '/pedidos(.*)',
+    '/((?!_next|api|sign-in|public).*)', // Protege todas as rotas exceto sign-in, api, etc.
   ],
 };

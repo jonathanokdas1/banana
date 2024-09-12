@@ -1,41 +1,81 @@
-"use client";
+"use client"; // Marcar como Client Component
 
-import React from "react";
-import CardProduto from "@/components/produtos/CardProduto"; // Certifique-se que o caminho está correto
+import { useState } from "react"; // Importa useState
+import { ProductsTabs } from "@/components/produtos/ProductsTabs";
+import CriarPedido from "@/components/produtos/criar/CriarPedido";
+import { ProductsTable } from "@/components/produtos/ProductsTable";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-const produtos = [
-  {
-    nome: "Protocolo Vaginose Zero",
-    preco: "R$ 299,00",
-    categoria: "Saúde Feminina",
-    imagem: "https://pepper-images-dev.s3.us-east-1.amazonaws.com/3a6fc67c-c863-4264-bec5-6a0c2111d7df"
-  },
-  {
-    nome: "Candida Zero",
-    preco: "R$ 199,00",
-    categoria: "Tratamento Natural",
-    imagem: "https://pepper-images-dev.s3.us-east-1.amazonaws.com/example-image.jpg"
-  },
-  // Adicione mais produtos aqui
-];
+// Importando os produtos simulados
+import produtos from "@/api/fake-db/produtos"; // Certifique-se que o caminho esteja correto
 
-const ProdutosPage = () => {
+export default function ProductsPage() {
+  const [activeTab, setActiveTab] = useState("all"); // Estado para gerenciar a aba ativa
+  const [productList, setProductList] = useState(produtos); // Estado para armazenar a lista de produtos
+
+  // Função para mover um produto para a categoria "Lixo"
+  const handleMoveToTrash = (id: string) => {
+    setProductList((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === id ? { ...product, status: "Lixo" } : product
+      )
+    );
+  };
+
+  // Função para arquivar um produto
+  const handleArchive = (id: string) => {
+    setProductList((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === id ? { ...product, status: "Arquivado" } : product
+      )
+    );
+  };
+
+  // Função para deletar um produto
+  const handleDelete = (id: string) => {
+    setProductList((prevProducts) => prevProducts.filter(product => product.id !== id));
+  };
+
+  // Filtra os produtos com base na aba ativa
+  const filteredProducts = productList.filter((product) => {
+    if (activeTab === "all") return true;
+    if (activeTab === "active") return product.status === "Ativo";
+    if (activeTab === "draft") return product.status === "Lixo";
+    if (activeTab === "archived") return product.status === "Arquivado";
+    return false;
+  });
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Produtos</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {produtos.map((produto, index) => (
-          <CardProduto
-            key={index}
-            nome={produto.nome}
-            preco={produto.preco}
-            categoria={produto.categoria}
-            imagem={produto.imagem}
-          />
-        ))}
+    <>
+      {/* Título e Tabs */}
+      <div className="flex justify-between items-center">
+        <ProductsTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="flex justify-end">
+          <CriarPedido />
+        </div>
       </div>
-    </div>
-  );
-};
 
-export default ProdutosPage;
+      {/* Tabela de Produtos */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Produtos</CardTitle>
+          <CardDescription>Gerencie seus produtos.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Passando os produtos filtrados para a tabela */}
+          <ProductsTable
+            products={filteredProducts}
+            onArchive={handleArchive}
+            onDelete={handleDelete}
+            onMoveToTrash={handleMoveToTrash}
+          />
+        </CardContent>
+        <CardFooter>
+          <div className="text-xs text-muted-foreground">
+            Mostrando <strong>{filteredProducts.length}</strong> de <strong>{productList.length}</strong> produtos
+          </div>
+        </CardFooter>
+      </Card>
+    </>
+  );
+}

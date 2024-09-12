@@ -65,10 +65,10 @@ const ChartContainer = React.forwardRef<
     </ChartContext.Provider>
   )
 })
-ChartContainer.displayName = "Chart"
+ChartContainer.displayName = "ChartContainer"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(
+  const colorConfig = Object.entries(config || {}).filter(
     ([_, config]) => config.theme || config.color
   )
 
@@ -137,15 +137,16 @@ const ChartTooltipContent = React.forwardRef<
       if (hideLabel || !payload?.length) {
         return null
       }
-
+    
       const [item] = payload
       const key = `${labelKey || item.dataKey || item.name || "value"}`
       const itemConfig = getPayloadConfigFromPayload(config, item, key)
+    
       const value =
         !labelKey && typeof label === "string"
-          ? config[label as keyof typeof config]?.label || label
+          ? config?.[label as keyof typeof config]?.label || label // Adicionada verificação se config existe
           : itemConfig?.label
-
+    
       if (labelFormatter) {
         return (
           <div className={cn("font-medium", labelClassName)}>
@@ -153,11 +154,11 @@ const ChartTooltipContent = React.forwardRef<
           </div>
         )
       }
-
+    
       if (!value) {
         return null
       }
-
+    
       return <div className={cn("font-medium", labelClassName)}>{value}</div>
     }, [
       label,
@@ -165,9 +166,10 @@ const ChartTooltipContent = React.forwardRef<
       payload,
       hideLabel,
       labelClassName,
-      config,
+      config, // Certifique-se de que config está sendo corretamente atualizado
       labelKey,
     ])
+    
 
     if (!active || !payload?.length) {
       return null
@@ -254,7 +256,7 @@ const ChartTooltipContent = React.forwardRef<
     )
   }
 )
-ChartTooltipContent.displayName = "ChartTooltip"
+ChartTooltipContent.displayName = "ChartTooltipContent"
 
 const ChartLegend = RechartsPrimitive.Legend
 
@@ -314,15 +316,16 @@ const ChartLegendContent = React.forwardRef<
     )
   }
 )
-ChartLegendContent.displayName = "ChartLegend"
+ChartLegendContent.displayName = "ChartLegendContent"
 
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
-  config: ChartConfig,
+  config: ChartConfig | undefined, // Adicionei "undefined" ao tipo de config
   payload: unknown,
   key: string
 ) {
-  if (typeof payload !== "object" || payload === null) {
+  if (typeof payload !== "object" || payload === null || !config) {
+    // Se config for undefined ou payload não for um objeto, retorne undefined
     return undefined
   }
 
@@ -350,10 +353,12 @@ function getPayloadConfigFromPayload(
     ] as string
   }
 
-  return configLabelKey in config
+  // Verificação se config está definido
+  return config && configLabelKey in config
     ? config[configLabelKey]
-    : config[key as keyof typeof config]
+    : config && config[key as keyof typeof config]
 }
+
 
 export {
   ChartContainer,

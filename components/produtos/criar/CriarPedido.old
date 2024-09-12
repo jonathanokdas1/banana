@@ -1,0 +1,21 @@
+// components/produtos/criar/CriarPedidoSheet.tsx
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "@/components/ui/sheet";
+import { CriarPedidoForm } from "@/components/produtos/criar/CriarPedidoForm"; // Formulário de criação do pedido
+
+export default function CriarPedidoSheet() {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <button className="bg-blue-500 text-white p-2 rounded">Criar Pedido</button>
+      </SheetTrigger>
+      <SheetContent className="w-[600px] p-6">
+        <SheetHeader>
+          <h2 className="text-xl font-bold mb-4">Criar Pedido</h2>
+        </SheetHeader>
+
+        {/* Formulário de Criação do Pedido */}
+        <CriarPedidoForm />
+      </SheetContent>
+    </Sheet>
+  );
+}
